@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Main {
     //游戏局面静态类
@@ -18,10 +19,10 @@ public class Main {
     }
 
     //棋子父类
-    public abstract class chessPieceClass {
+    public static abstract class chessPieceClass {
         //棋子基本信息表
         int x_Coordinate;
-        int y_Coordinate;
+        int y_Coordinate; //y使用要加1
         int chessPieceNumber;
         int camp; //阵营：红1黑2
         //用于遍历取用的方向表
@@ -32,7 +33,7 @@ public class Main {
         ArrayList<Integer[]> actionDirectPoint  = new ArrayList<>();
         //该棋子一共可能的下法,五元数组：移动方向，移动距离，目标位置x，y，吃子编号，[评价值]
         ArrayList<Integer[]> actionList = new ArrayList<>();
-        
+
         //构造方法，自动获取棋子位置，输入是棋子编号
         public chessPieceClass(int cPNumber) {
             chessPieceNumber = cPNumber;
@@ -45,8 +46,8 @@ public class Main {
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 9; j++) {
                     if (chessSituation.mainChessBoard[i][j] == chessPieceNumber) {
-                        x_Coordinate = i;
-                        y_Coordinate = j;
+                        x_Coordinate = j;
+                        y_Coordinate = i-1;//这里xy是确认数组的列与行，然后因为都是从0开始的，所有的y都要-1
                         break;
                     }
                 }
@@ -61,7 +62,7 @@ public class Main {
     }
 
     //小棋子类
-    public class Bing extends chessPieceClass {
+    public static class Bing extends chessPieceClass {
         //构造方法：获取该兵的位置
         public Bing(int bingNum) {
             super(bingNum);
@@ -73,33 +74,36 @@ public class Main {
             ArrayList<Integer> bingFirst = new ArrayList<>();
             //根据规则，兵无下，取消2号方向
             actionDirectionPre1[1] = 0;
+            //System.out.println(Arrays.toString(actionDirectionPre1)); [1, 0, 3, 4]
             //根据阵营判断位置是否符合条件
             switch (camp) {
                 case 1:
                     //红方的兵，大于等于0小于5，在敌方
                     if ((y_Coordinate>=0)|(y_Coordinate<5)) {
-                        actionDirectionPre1[3] = 3;
-                        actionDirectionPre1[4] = 4;
+                        actionDirectionPre1[2] = 3;
+                        actionDirectionPre1[3] = 4;
                     } else if ((y_Coordinate>=5)|(y_Coordinate<=9)) {
+                        actionDirectionPre1[2] = 0;
                         actionDirectionPre1[3] = 0;
-                        actionDirectionPre1[4] = 0;
                     }
                 case 2:
                     //黑方的兵正好相反
                     if ((y_Coordinate>=0)|(y_Coordinate<5)) {
+                        actionDirectionPre1[2] = 0;
                         actionDirectionPre1[3] = 0;
-                        actionDirectionPre1[4] = 0;
                     } else if ((y_Coordinate>=5)|(y_Coordinate<=9)) {
-                        actionDirectionPre1[3] = 3;
-                        actionDirectionPre1[4] = 4;
+                        actionDirectionPre1[2] = 3;
+                        actionDirectionPre1[3] = 4;
                     }
             }
+            System.out.println(Arrays.toString(actionDirectionPre1));
             //遍历这个临时数组，为零的忽略
             for (int i = 0; i < 4; i++) {
                 if (actionDirectionPre1[i] != 0) {
                     bingFirst.add(actionDirectionPre1[i]);
                 }
             }
+            //System.out.println(bingFirst); [1]
             //判断每一种方向的初步移动，因为只需要移动一格，所以简单
             for (int i = 0; i < bingFirst.size(); i++) {
                 //创建新坐标
@@ -113,19 +117,32 @@ public class Main {
                     case 4:
                         x_new += 1;
                 }
-                //添加到列表
-                Integer[] adpL = {bingFirst.get(i),x_new,y_new};
-                actionDirectPoint.add(adpL);
+                //System.out.println(y_Coordinate); 5
+                //System.out.println(x_new); 0
+                //System.out.println(y_new); 4
+                //添加到列表，并进行边界判断
+                if (((x_new>=0)|(x_new<=8))|((y_new>=0)|(y_new<=9))) {
+                    Integer[] adpL = {bingFirst.get(i),x_new,y_new};
+                    actionDirectPoint.add(adpL);
+                }
+                //System.out.println(actionDirectPoint);
             }
         }
 
         @Override
         public void moveAction() {
+            //吃子判断
 
         }
     }
 
     public static void main(String[] args) {
-
+        Bing b = new Bing(11);
+        b.directAction();
+        System.out.println(b.actionDirectPoint);
+        for (int i = 0; i < (b.actionDirectPoint).size(); i++) {
+            Integer[] m = (b.actionDirectPoint).get(i);
+            System.out.println(Arrays.toString(m));
+        }
     }
 }
