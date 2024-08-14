@@ -6,16 +6,16 @@ public class Main {
     public static class chessSituation {
         public static int[][] mainChessBoard = {
                 {39,41,44,46,42,45,43,40,38},
-                {0,0,0,0,0,0,0,0,0},
-                {0,37,0,0,0,0,0,36,0},
-                {35,0,34,0,33,0,32,0,31},
-                {11,0,0,0,0,0,0,0,0},
-                {0,0,0,0,0,0,0,0,0},
-                {0,0,12,0,13,0,14,0,15},
-                {0,16,0,0,0,0,0,17,0},
-                {0,0,0,0,0,0,0,0,0},
-                {18,20,23,25,22,26,24,21,19}
-        };
+                {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
+                {0 ,37,0 ,0 ,0 ,0 ,0 ,36,0 },
+                {35,0 ,34,0 ,33,0 ,32,0 ,31},
+                {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
+                {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
+                {11,0 ,12,0 ,13,0 ,14,0 ,15},
+                {0 ,16,0 ,0 ,0 ,0 ,0 ,17,0 },
+                {0 ,0 ,0 ,0 ,22,0 ,0 ,0 ,0 },
+                {18,20,23,25,0 ,26,24,21,19}};
+        public static boolean gameState = true;
     }
 
     //棋子父类
@@ -29,7 +29,7 @@ public class Main {
         int[] actionDirectionPre1 = {1, 2, 3, 4}; //上↑，下↓，左←，右→
         int[] actionDirectionPre2 = {5, 6, 7, 8}; //左上↖，左下↙，右上↗，右下↘
         int[] actionDirectionEs = {11, 12}; //对于马的横纵
-        //方向与落点x,y，存储为3元数组
+        //方向距离与落点x,y，存储为4元数组
         ArrayList<Integer[]> actionDirectPoint  = new ArrayList<>();
         //该棋子一共可能的下法,五元数组：移动方向，移动距离，目标位置x，y，吃子编号，[评价值]
         ArrayList<Integer[]> actionList = new ArrayList<>();
@@ -115,7 +115,7 @@ public class Main {
                 }
                 //添加到列表，并进行边界判断
                 if (((x_new>=0)&&(x_new<=8))&&((y_new>=0)&&(y_new<=9))) {
-                    Integer[] adpL = {bingFirst.get(i),x_new,y_new};
+                    Integer[] adpL = {bingFirst.get(i),1,x_new,y_new};
                     actionDirectPoint.add(adpL);
                 }
             }
@@ -123,16 +123,112 @@ public class Main {
 
         @Override
         public void moveAction() {
-            //吃子判断
+            //吃子，与特殊处理
+            for (int i = 0; i < actionDirectPoint.size(); i++) {
+                Integer[] tL = actionDirectPoint.get(i);
+                //检查大表中目前的xy值对应的棋子
+                int eatingChess = chessSituation.mainChessBoard[tL[3]][tL[2]];
+                //判断阵营
+                int eatingChessCamp = 0; //红1黑2
+                if ((eatingChess < 30)&&(eatingChess>0)) {
+                    eatingChessCamp = 1;
+                } else if (eatingChessCamp > 30) {
+                    eatingChessCamp = 2;
+                }
+                //不能吃自己阵营的子
+                if (eatingChessCamp != camp) {
+                    Integer[] newList = {tL[0], tL[1], tL[2], tL[3], eatingChess};
+                    actionList.add(newList);
+                }
+            }
+        }
+    }
+
+    //将：第二难的棋子
+    public static class Jiang extends chessPieceClass {
+        //构造方法：获取该将的位置
+        public Jiang(int bingNum) {
+            super(bingNum);
+        }
+
+        @Override
+        public void directAction() {
+            //将是横向走法，使用1表
+            ArrayList<Integer> jiangFirst = new ArrayList<>();
+            //直接流动赋值
+            for (int i = 0; i < 4; i++) {
+                jiangFirst.add(actionDirectionPre1[i]);
+            }
+            //将在走法上并没有限制，不在走法上削减将,直接模拟运行
+            int x_new = x_Coordinate;
+            int y_new = y_Coordinate;
+            //x_new 在重写的时候改进了一下写法，前面的懒得改了
+            for (int i = 0; i < 4; i++) {
+                switch (actionDirectionPre1[i]) {
+                    case 1:
+                        y_new -= 1;
+                        break;
+                    case 2:
+                        y_new += 1;
+                        break;
+                    case 3:
+                        x_new -= 1;
+                        break;
+                    case 4:
+                        x_new += 1;
+                }
+                //将的活动范围是九宫，x3-5,y0-2(b),7-9(r)
+                switch (camp) {
+                    case 1: //红
+                        if (((x_new<=5)&&(x_new>=3))&&((y_new>=7)&&(y_new<=9))) {
+                            Integer[] adpL = {jiangFirst.get(i),1,x_new,y_new};
+                            actionDirectPoint.add(adpL);
+                        }
+                        break;
+                    case 2:
+                        if (((x_new<=5)&&(x_new>=3))&&((y_new>=0)&&(y_new<=2))) {
+                            Integer[] adpL = {jiangFirst.get(i),1,x_new,y_new};
+                            actionDirectPoint.add(adpL);
+                        }
+                        break;
+                }
+            }
+        }
+
+        @Override
+        public void moveAction() {
+            //吃子，与特殊处理
+            for (int i = 0; i < actionDirectPoint.size(); i++) {
+                System.out.println(i+1);
+                Integer[] tL = actionDirectPoint.get(i);
+                //检查大表中目前的xy值对应的棋子
+                int eatingChess = chessSituation.mainChessBoard[tL[3]][tL[2]];
+                //判断阵营
+                int eatingChessCamp = 0; //红1黑2
+                if ((eatingChess < 30)&&(eatingChess>0)) {
+                    eatingChessCamp = 1;
+                } else if (eatingChessCamp > 30) {
+                    eatingChessCamp = 2;
+                }
+                //不能吃自己阵营的子
+                System.out.println(eatingChess);
+                System.out.println(eatingChessCamp);
+                if (eatingChessCamp != camp) {
+                    System.out.println(eatingChessCamp != camp);
+                    Integer[] newList = {tL[0], tL[1], tL[2], tL[3], eatingChess};
+                    actionList.add(newList);
+                }
+            }
         }
     }
 
     public static void main(String[] args) {
-        Bing b = new Bing(11);
+        Jiang j = new Jiang(22);
         //监测输出信息
-        b.directAction();
-        for (int i = 0; i < (b.actionDirectPoint).size(); i++) {
-            Integer[] m = (b.actionDirectPoint).get(i);
+        j.directAction();
+        j.moveAction();
+        for (int i = 0; i < (j.actionList).size(); i++) {
+            Integer[] m = (j.actionList).get(i);
             System.out.println(Arrays.toString(m));
         }
     }
