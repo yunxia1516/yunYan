@@ -13,8 +13,8 @@ public class Main {
                 {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
                 {11,0 ,12,0 ,13,0 ,14,0 ,15},
                 {0 ,16,0 ,0 ,0 ,0 ,0 ,17,0 },
-                {0 ,0 ,0 ,0 ,22,0 ,0 ,0 ,0 },
-                {18,20,23,25,0 ,26,24,21,19}};
+                {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
+                {18,20,23,25,22,26,24,21,19}};
         public static boolean gameState = true;
     }
 
@@ -160,10 +160,11 @@ public class Main {
                 jiangFirst.add(actionDirectionPre1[i]);
             }
             //将在走法上并没有限制，不在走法上削减将,直接模拟运行
-            int x_new = x_Coordinate;
-            int y_new = y_Coordinate;
             //x_new 在重写的时候改进了一下写法，前面的懒得改了
             for (int i = 0; i < 4; i++) {
+                int x_new = x_Coordinate;
+                int y_new = y_Coordinate;
+                //这里的xnew, ynew是临时变量，放出去会出大毛病
                 switch (actionDirectionPre1[i]) {
                     case 1:
                         y_new -= 1;
@@ -199,7 +200,6 @@ public class Main {
         public void moveAction() {
             //吃子，与特殊处理
             for (int i = 0; i < actionDirectPoint.size(); i++) {
-                System.out.println(i+1);
                 Integer[] tL = actionDirectPoint.get(i);
                 //检查大表中目前的xy值对应的棋子
                 int eatingChess = chessSituation.mainChessBoard[tL[3]][tL[2]];
@@ -211,10 +211,7 @@ public class Main {
                     eatingChessCamp = 2;
                 }
                 //不能吃自己阵营的子
-                System.out.println(eatingChess);
-                System.out.println(eatingChessCamp);
                 if (eatingChessCamp != camp) {
-                    System.out.println(eatingChessCamp != camp);
                     Integer[] newList = {tL[0], tL[1], tL[2], tL[3], eatingChess};
                     actionList.add(newList);
                 }
@@ -222,8 +219,38 @@ public class Main {
         }
     }
 
+    public static class Ju extends chessPieceClass {
+        public Ju(int cPNumber) {
+            super(cPNumber);
+        }
+
+        @Override
+        public void directAction() {
+            //首先扫描上下左右四个方向的棋子，把边界/最近棋子存入
+            int upNumber = 0;
+            int downNumber = 0;
+            int leftNumber = 0;
+            int rightNumber = 0;
+            //循环扫描：上
+            for (int i = 0; i < chessSituation.mainChessBoard.length; i++) {
+                int thisChess = chessSituation.mainChessBoard[y_Coordinate][x_Coordinate];
+                if (thisChess == 0) {
+                    upNumber += 1;
+                } else if (thisChess == ) {
+                    
+                }
+
+            }
+        }
+
+        @Override
+        public void moveAction() {
+
+        }
+    }
+
     public static void main(String[] args) {
-        Jiang j = new Jiang(22);
+        Ju j = new Ju(22);
         //监测输出信息
         j.directAction();
         j.moveAction();
