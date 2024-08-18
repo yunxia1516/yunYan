@@ -11,10 +11,10 @@ public class Main {
                 {35,0 ,34,0 ,33,0 ,32,0 ,31},
                 {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
                 {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
-                {11,0 ,12,0 ,13,0 ,14,0 ,15},
+                {11,0 ,12,18,13,0 ,14,0 ,15},
                 {0 ,16,0 ,0 ,0 ,0 ,0 ,17,0 },
                 {0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 },
-                {18,20,23,25,22,26,24,21,19}};
+                {0 ,20,23,25,22,26,24,21,19}};
         public static boolean gameState = true;
     }
 
@@ -25,11 +25,12 @@ public class Main {
         int y_Coordinate;
         int chessPieceNumber;
         int camp; //阵营：红1黑2
+        int eatingChess = 0;
         //用于遍历取用的方向表
         int[] actionDirectionPre1 = {1, 2, 3, 4}; //上↑，下↓，左←，右→
         int[] actionDirectionPre2 = {5, 6, 7, 8}; //左上↖，左下↙，右上↗，右下↘
         int[] actionDirectionEs = {11, 12}; //对于马的横纵
-        //方向距离与落点x,y，存储为4元数组
+        //方向,距离与落点x,y，存储为4元数组
         ArrayList<Integer[]> actionDirectPoint  = new ArrayList<>();
         //该棋子一共可能的下法,五元数组：移动方向，移动距离，目标位置x，y，吃子编号，[评价值]
         ArrayList<Integer[]> actionList = new ArrayList<>();
@@ -226,20 +227,30 @@ public class Main {
 
         @Override
         public void directAction() {
-            //首先扫描上下左右四个方向的棋子，把边界/最近棋子存入
-            int upNumber = 0;
-            int downNumber = 0;
-            int leftNumber = 0;
-            int rightNumber = 0;
-            //循环扫描：上
-            for (int i = 0; i < chessSituation.mainChessBoard.length; i++) {
-                int thisChess = chessSituation.mainChessBoard[y_Coordinate][x_Coordinate];
-                if (thisChess == 0) {
-                    upNumber += 1;
-                } else if (thisChess == ) {
-                    
+            //尝试一步到位，直接添加到那个表格
+            for (int i = 1; i < x_Coordinate+1; i++) {
+                //首先向左看
+                int ec = chessSituation.mainChessBoard[y_Coordinate][x_Coordinate-i];
+                if (ec == 0) { //没吃子
+                    Integer[] eList = {3,i,x_Coordinate-i,y_Coordinate};
+                    actionDirectPoint.add(eList);
+                } else if (x_Coordinate-1 == i) { //越界断档
+                    Integer[] eList = {3,i,x_Coordinate-i,y_Coordinate};
+                    actionDirectPoint.add(eList);
+                } else { //吃子情况
+                    Integer[] eList = {3,i,x_Coordinate-i,y_Coordinate};
+                    actionDirectPoint.add(eList);
+                    for (int j = 0; j < (actionDirectPoint).size(); j++) {
+                        Integer[] m = (actionDirectPoint).get(j);
+                        System.out.println(Arrays.toString(m));
+                    }
+                    break;
                 }
-
+                System.out.println(actionDirectPoint);
+                for (int j = 0; j < (actionDirectPoint).size(); j++) {
+                    Integer[] m = (actionDirectPoint).get(j);
+                    System.out.println(Arrays.toString(m));
+                }
             }
         }
 
@@ -250,7 +261,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Ju j = new Ju(22);
+        Ju j = new Ju(18);
         //监测输出信息
         j.directAction();
         j.moveAction();
